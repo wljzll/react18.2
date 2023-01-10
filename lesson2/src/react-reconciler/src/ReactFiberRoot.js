@@ -11,7 +11,7 @@ function FiberRootNode(containerInfo) {
  * @returns FiberRootNode实例
  */
 export function createFiberRoot(containerInfo) {
-  // 创建fiberRoot
+  // 创建FiberRootNode实例 这个实例就是fiberRoot
   const root = new FiberRootNode(containerInfo);
   // 创建rootFiber
   const uninitializedFiber = createHostRootFiber();

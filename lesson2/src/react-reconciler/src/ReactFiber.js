@@ -1,4 +1,9 @@
-import { HostRoot } from './ReactWorkTags';
+import {
+  HostRoot,
+  IndeterminateComponent,
+  HostComponent,
+  HostText,
+} from './ReactWorkTags';
 import { NoFlags } from './ReactFiberFlags';
 export function FiberNode(tag, pendingProps, key) {
   this.tag = tag;
@@ -69,4 +74,48 @@ export function createWorkInProgress(current, pendingProps) {
   workInProgress.sibling = current.sibling;
   workInProgress.index = current.index;
   return workInProgress;
+}
+
+/**
+ *
+ * @param {*} type Virtual DOM的元素类型
+ * @param {*} key Virtual DOM的key
+ * @param {*} pendingProps Virtual DOM的props
+ * @returns 根据Virtual DOM创建的fiber
+ */
+export function createFiberFromTypeAndProps(type, key, pendingProps) {
+  // 未确定的类型
+  let fiberTag = IndeterminateComponent;
+  // 如果元素类型是string
+  if (typeof type === 'string') {
+    // 给fiberTag赋值
+    fiberTag = HostComponent;
+  }
+  // 创建fiber
+  const fiber = createFiber(fiberTag, pendingProps, key);
+  // 给fiber的type赋值
+  fiber.type = type;
+  // 返回fiber
+  return fiber;
+}
+
+/**
+ *
+ * @param {*} element 对应元素的虚拟DOM
+ * @returns
+ */
+export function createFiberFromElement(element) {
+  // 解构出type
+  const { type } = element;
+  // 解构出key
+  const { key } = element;
+  // 拿到props
+  const pendingProps = element.props;
+  const fiber = createFiberFromTypeAndProps(type, key, pendingProps);
+  return fiber;
+}
+
+export function createFiberFromText(content) {
+  const fiber = createFiber(HostText, content, null);
+  return fiber;
 }
