@@ -3,6 +3,7 @@ import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import { enqueueConcurrentHookUpdate } from './ReactFiberConcurrentUpdates'
 import is from "shared/objectIs";
 
+// 解构出dispatcher生成函数
 const { ReactCurrentDispatcher } = ReactSharedInternals;
 // 当前正在渲染中的fiber
 let currentlyRenderingFiber = null;
@@ -22,58 +23,62 @@ const HooksDispatcherOnUpdate = {
   useState: updateState,
 }
 
+/**
+ * 根据老的hook复用memoizedState属性和queue队列
+ * @returns
+ */
 function updateWorkInProgressHook() {
   // 获取将要构建的新的Hook的老hook
-  if (currentHook === null) {
-    const current = currentlyRenderingFiber.alternate;
-    currentHook = current.memoizedState;
-  } else {
+  if (currentHook === null) { // 如果在函数组件中有两个 useReducer 第一次进入是null 第二次就存在了
+    const current = currentlyRenderingFiber.alternate; // 获取老fiber
+    currentHook = current.memoizedState; // 拿到老fiber的memoizedState也就是对应的hook
+  } else { // 如果是第二次进入 就取第一次hook的next 依此类推
     currentHook = currentHook.next;
   }
 
   // 根据老hook创建新hook
   const newHook = {
-    memoizedState: currentHook.memoizedState,
-    queue: currentHook.queue,
+    memoizedState: currentHook.memoizedState, // 复用老的状态
+    queue: currentHook.queue, // 复用老的更新队列
     next: null,
   }
 
-  if (workInProgressHook === null) {
+  // 重新构建更新队列链表
+  if (workInProgressHook === null) { // 首次进入更新
     currentlyRenderingFiber.memoizedState = workInProgressHook = newHook;
-  } else {
+  } else { // 非首次
     workInProgressHook = workInProgressHook.next = newHook;
   }
+  // 返回最后一个hook
   return workInProgressHook;
 }
 
 /**
- * @description 内置的reducer
- * @param {*} state 
- * @param {*} action 
- * @returns 
+ * @description 内置的reducer 传递给updateReducer这个公用的方法的兼容性的reducer
+ * @param {*} state 老的状态
+ * @param {*} action 新的状态
+ * @returns
  */
 function basicStateReducer(state, action) {
   return typeof action === "function" ? action(state) : action;
 }
+
+/**
+ * 更新state
+ * @returns [状态, setState]
+ */
 function updateState() {
   return updateReducer(basicStateReducer);
 }
 
-function mountState(initialState) {
-  const hook = mountWorkInProgressHook();
-  hook.memoizedState = hook.baseState = initialState;
-  const queue = {
-    pending: null,
-    dispatch: null,
-    lastRenderedReducer: basicStateReducer,
-    lastRenderedState: initialState,
-  };
-  hook.queue = queue;
-  const dispatch = (queue.dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue));
-  return [hook.memoizedState, dispatch];
-}
-
-function dispatchSetState(fiber, queue, action) {
+/**
+ * @description 真正的useState的dispatch方法
+ * @param {*} fiber 函数组件的fiber
+ * @param {*} queue 更新队列
+ * @param {*} action 传入的值  0 1 2类似这种
+ * @returns
+ */
+ function dispatchSetState(fiber, queue, action) {
   const update = {
     action,
     hasEagerState: false,
@@ -82,9 +87,11 @@ function dispatchSetState(fiber, queue, action) {
   };
   const lastRenderedReducer = queue.lastRenderedReducer;
   const currentState = queue.lastRenderedState;
+  // 调用scheduleUpdateOnFiber更新前先计算最新值 如果和老值相等 就不用更新
   const eagerState = lastRenderedReducer(currentState, action);
   update.hasEagerState = true;
   update.eagerState = eagerState;
+  // 如果新老相等不用更新
   if (is(eagerState, currentState)) {
     return;
   }
@@ -92,17 +99,43 @@ function dispatchSetState(fiber, queue, action) {
   scheduleUpdateOnFiber(root, fiber);
 }
 
+/**
+ * @description 初次挂载useState
+ * @param {*} initialState 初始状态
+ * @returns
+ */
+function mountState(initialState) {
+  const hook = mountWorkInProgressHook(); // 创建一个hook 其实就是一个破对象
+  hook.memoizedState = hook.baseState = initialState; // 赋初始值
+  // 创建queue队列
+  const queue = {
+    pending: null, // 保存更新
+    dispatch: null, // dispatch方法
+    lastRenderedReducer: basicStateReducer,
+    lastRenderedState: initialState, // 此次更新的上一次的状态
+  };
+  hook.queue = queue; // 将更新队列赋值给hook
+  const dispatch = (queue.dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue)); // 定义dispatch方法
+  // 返回
+  return [hook.memoizedState, dispatch];
+}
+
+/**
+ * 将初次挂载时构建的hook更新链递归交给reducer执行 生成新的状态
+ * @param {*} reducer
+ * @returns
+ */
 function updateReducer(reducer) {
-  // 获取新的hook
-  const hook = updateWorkInProgressHook();
-  // 获取新的hook的更新队列
-  const queue = hook.queue;
-  // 获取老的hook
-  const current = currentHook;
-  // 获取将要生效的更新队列
-  const pendingQueue = queue.pending;
-  // 初始化一个新的状态 取值为当前的状态
-  let newState = current.memoizedState;
+  const hook = updateWorkInProgressHook(); // 获取新的hook
+
+  const queue = hook.queue; // 获取新的hook的更新队列
+
+  const current = currentHook; // 获取老的hook
+
+  const pendingQueue = queue.pending; // 获取将要生效的更新队列
+
+  let newState = current.memoizedState; // 初始化一个新的状态 取值为当前的状态
+
   if (pendingQueue !== null) {
     queue.pending = null;
     const firstUpdate = pendingQueue.next;
@@ -122,13 +155,14 @@ function updateReducer(reducer) {
 }
 
 function mountReducer(reducer, initialArg) {
-  // 创建一个hook
-  const hook = mountWorkInProgressHook();
-  hook.memoizedState = initialArg;
+  const hook = mountWorkInProgressHook(); // 创建一个hook 其实就是一个破对象
+  hook.memoizedState = initialArg; // 赋初始值
+  // 创建queue队列
   const queue = {
     pending: null
   }
-  // 将queue添加到hook的queue上
+  // 将queue添加到hook的queue上 hook.queue指向了queue这个空间地址
+  // dispatch中对更新的入队操作的都是queue这个空间 也就改变了fiber上对应的hook
   hook.queue = queue;
   // 这是dispatch方法
   const dispatch = (queue.dispatch = dispatchReducerAction.bind(null, currentlyRenderingFiber, queue));
@@ -181,7 +215,7 @@ export function renderWithHooks(current, workInProgress, Component, props) {
   if (current !== null && current.memoizedState !== null) {
     ReactCurrentDispatcher.current = HooksDispatcherOnUpdate;
   } else { // 否则是首次挂载
-    // 需要在函数组件执行前给ReactCurrentDispatcher.current赋值
+    // 首次挂载在函数组件执行前给useReducer和useState赋值
     ReactCurrentDispatcher.current = HookDispatcherOnMount;
   }
 
@@ -191,3 +225,24 @@ export function renderWithHooks(current, workInProgress, Component, props) {
   currentHook = null;
   return children;
 }
+
+
+/**
+ * 触发dispatch更新的逻辑:
+ * 1. 执行dispatch先去将update按照格式存入到数组中
+ * 2. 此次click事件全部执行完成，更新全部存入到数组中后, requestIdleCallback才会调用scheduleUpdateOnFiber
+ * 3. 由根节点进入fiber树的重新计算更新, 先是由finishQueueingConcurrentUpdates()将(1)中数组存放的更新将更新
+ *    构建成闭环链表
+ * 4. 当fiber构建到函数组件时, 会再次执行函数组件, 这时函数组件的新fiber已经构建完成, 会进入到更新逻辑
+ * 5. 将click事件中的所有的更新操作交给reducer执行 将最后的结果赋值给最新的状态并返回[state, dispatch]
+ * 6. 继续进行fiber的构建和提交最后更新的就是最新的状态
+ */
+
+/**
+ * useReducer和useState的区别：
+ * 1. useState传入的是想要改成什么值就传入什么值,
+ *   useState(0)
+ *
+ * 2. useReducer的控制权在reducer函数
+ *    useReducer(处理函数, 初始值)
+ */

@@ -1,6 +1,6 @@
 import { useReducer, useState } from "./ReactHooks";
 import ReactSharedInternals from './ReactSharedInternals';
-console.log('导入文件在项目运行的时候就会执行这个文件');
+
 export {
     useReducer,
     useState,

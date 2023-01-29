@@ -14,6 +14,7 @@ SimpleEventPlugin.registerEvents();
 const listeningMarker = `_reaceListening` + Math.random().toString(36).slice(2);
 
 export function listenToAllSupportedEvents(rootContainerElement) {
+  debugger;
     // 监听根容器 也就是div#root只监听一次
     if (!rootContainerElement[listeningMarker]) {
         rootContainerElement[listeningMarker] = true;
@@ -41,6 +42,13 @@ export function listenToNativeEvent(domEventName, isCapturePhaseListener, target
     addTrappedEventListener(target, domEventName, eventSystemFlags, isCapturePhaseListener);
 }
 
+/**
+ * @description 创建事件监听函数 并为根元素添加添加事件监听
+ * @param {*} target 根元素div#root
+ * @param {*} domEventName 事件名
+ * @param {*} eventSystemFlags 事件系统标识
+ * @param {*} isCapturePhaseListener 是否是捕获阶段
+ */
 function addTrappedEventListener(target, domEventName, eventSystemFlags, isCapturePhaseListener) {
     // 创建带有优先级的事件监听函数 事件处理函数
     const listener = createEventListenerWrapperWithPriority(target, domEventName, eventSystemFlags);
@@ -53,6 +61,14 @@ function addTrappedEventListener(target, domEventName, eventSystemFlags, isCaptu
     }
 }
 
+/**
+ * @description 派发事件
+ * @param {*} domEventName
+ * @param {*} eventSystemFlags
+ * @param {*} nativeEvent
+ * @param {*} targetInst
+ * @param {*} targetContainer
+ */
 export function dispatchEventForPluginEventSystem(
     domEventName,
     eventSystemFlags,
@@ -69,13 +85,21 @@ export function dispatchEventForPluginEventSystem(
     );
 }
 
+/**
+ * @description 派发事件
+ * @param {*} domEventName
+ * @param {*} eventSystemFlags
+ * @param {*} nativeEvent
+ * @param {*} targetInst
+ * @param {*} targetContainer
+ */
 function dispatchEventForPlugins(
     domEventName,
     eventSystemFlags,
     nativeEvent,
     targetInst,
     targetContainer) {
-    // 获取事件源
+    // 获取事件源 获取事件源的方法有兼容性问题因此要兼容性的获取
     const nativeEventTarget = getEventTarget(nativeEvent);
     // 派发事件的数组
     const dispatchQueue = [];
@@ -129,6 +153,16 @@ function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePha
     }
 }
 
+/**
+ * @description 执行事件处理函数之前先把所有的相关节点的事件都收集起来
+ * @param {*} dispatchQueue
+ * @param {*} domEventName
+ * @param {*} targetInst
+ * @param {*} nativeEvent
+ * @param {*} nativeEventTarget
+ * @param {*} eventSystemFlags
+ * @param {*} targetContainer
+ */
 function extractEvents(
     dispatchQueue,
     domEventName,
@@ -149,6 +183,14 @@ function extractEvents(
     )
 }
 
+/**
+ * @description 从fiber上获取对应的事件的事件处理函数
+ * @param {*} targetFiber 事件源对应的fiber
+ * @param {*} reactName 原生事件对应的React事件事件名
+ * @param {*} nativeEventType 原生事件名
+ * @param {*} isCapturePhase 是否是捕获阶段
+ * @returns 收集的事件处理函数
+ */
 export function accumulateSinglePhaseListeners(
     targetFiber,
     reactName,

@@ -11,7 +11,6 @@ function hasValidRef(config) {
   return config.ref !== undefined;
 }
 
-
 /**
  * 创建虚拟DOM
  * @param {*} type

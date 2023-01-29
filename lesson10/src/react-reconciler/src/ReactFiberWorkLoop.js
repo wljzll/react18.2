@@ -36,12 +36,11 @@ function ensureRootIsScheduled(root) {
 }
 
 /**
- * @description 执行root上的并发更新工作 根据虚拟DOM构建fiber树 
+ * @description 执行root上的并发更新工作 根据虚拟DOM构建fiber树
  * fiber树创建完成后 要创建真实的DOM节点　还需要把真实的DOM节点插入容器
  * @param {*} root
  */
 function performConcurrentWorkOnRoot(root) {
-
   // 第一次渲染以同步的方式渲染根节点 初次渲染的时候 都是同步
   renderRootSync(root);
 
@@ -54,15 +53,13 @@ function performConcurrentWorkOnRoot(root) {
 }
 
 /**
- * 
- * @param {*} root 
+ *
+ * @param {*} root
  */
 function commitRoot(root) {
   // 解构出已完成的根fiber
   const { finishedWork } = root;
-  console.log('完成的fiber树', finishedWork);
   printFinishedWork(finishedWork);
-  console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
   // 判断子树有没有副作用
   const subtreeHasEffects = (finishedWork.subtreeFlags & MutationMask) !== NoFlags;
   // 判断自己有没有副作用
@@ -91,7 +88,7 @@ function prepareFreshStack(root) {
  * @param {*} root
  */
 function renderRootSync(root) {
-  // 准备一个新鲜的栈 
+  // 准备一个新鲜的栈
   prepareFreshStack(root);
   // 工作循环同步
   workLoopSync();
@@ -114,7 +111,7 @@ function performUnitOfWork(unitOfWork) {
   // 老fiber
   const current = unitOfWork.alternate;
   // 开始工作 完成当前fiber的子fiber链表构建后
-  const next = beginWork(current, unitOfWork);
+  const next = beginWork(current, unitOfWork); // 返回的是当前父fiber构建完成的子fiber可能有也可能为null
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   // next等于null说明没有子节点了说明构建已经完成了
   if (next === null) {

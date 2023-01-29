@@ -1,9 +1,9 @@
 import { getFiberCurrentPropsFromNode } from "../client/ReactDOMComponentTree";
 
 /**
- * @description 获取此fiber上对应的回调函数
- * @param {*} inst 
- * @param {*} registrationName 
+ * @description 获取此fiber上对应的事件的回调函数
+ * @param {*} inst fiber实例
+ * @param {*} registrationName 事件名
  */
 export default function getListener(inst, registrationName) {
     const { stateNode } = inst;

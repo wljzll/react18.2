@@ -17,10 +17,10 @@ import { HostText } from './ReactWorkTags';
 function createChildReconciler(shouldTrackSideEffects) {
 
   /**
-   * @description 基于新fiber的属性服用老fiber
-   * @param {*} fiber 
-   * @param {*} pendingProps 
-   * @returns 
+   * @description 基于新fiber的属性复用老fiber 用新的虚拟DOM的属性更新复用的fiber上
+   * @param {*} fiber 老的可复用的fiber
+   * @param {*} pendingProps 新虚拟DOM对应的属性
+   * @returns
    */
   function useFiber(fiber, pendingProps) {
     const clone = createWorkInProgress(fiber, pendingProps);
@@ -49,9 +49,9 @@ function createChildReconciler(shouldTrackSideEffects) {
 
   /**
    * @description 删除子fiber节点
-   * @param {*} returnFiber 
-   * @param {*} currentFirstChild 
-   * @returns 
+   * @param {*} returnFiber 父fiber
+   * @param {*} currentFirstChild 要删除的子fiber
+   * @returns
    */
   function deleteRemaingChildren(returnFiber, currentFirstChild) {
     if (!shouldTrackSideEffects) {
@@ -67,7 +67,7 @@ function createChildReconciler(shouldTrackSideEffects) {
 
 
   /**
-   * 
+   *
    * @param {*} returnFiber 替身fiber
    * @param {*} currentFirstChild 老fiber的儿子 null
    * @param {*} element 子元素的虚拟DOM
@@ -86,8 +86,8 @@ function createChildReconciler(shouldTrackSideEffects) {
           // key一样 type也一样 那就删除剩下其他的儿子
           deleteRemaingChildren(returnFiber, child.sibling);
           // 如果key一样 类型也一样 则认为此节点可以服用
-          const existing = useFiber(child, element.props);
-          existing.return = returnFiber;
+          const existing = useFiber(child, element.props); // 复用老fiber并返回根据老fiber复用生成的新fiber
+          existing.return = returnFiber; // 给新fiber创建父子关系
           return existing;
         } else { // key相同但是type不同 那就全部都不能复用 全部删除
           deleteRemaingChildren(returnFiber, child);
@@ -114,7 +114,7 @@ function createChildReconciler(shouldTrackSideEffects) {
    * @returns
    */
   function placeSingleChild(newFiber) {
-    // 如果要收集依赖则 |上Placement 要在最后的提交阶段插入此节点 
+    // 如果要收集依赖则 |上Placement 要在最后的提交阶段插入此节点
     // 如果要收集以来 并且当前的fiber没有老fiber 说明是初次挂载 才需要插入 否则是更新则不需要插入
     if (shouldTrackSideEffects && newFiber.alternate === null) newFiber.flags |= Placement;
     return newFiber;
@@ -127,10 +127,10 @@ function createChildReconciler(shouldTrackSideEffects) {
   }
 
   /**
-   * 
+   *
    * @param {*} returnFiber 父fiber
    * @param {*} newChild 新儿子
-   * @returns 
+   * @returns
    */
   function createChild(returnFiber, newChild) {
     // 说明这个一个文本：数字或者文字
@@ -172,11 +172,11 @@ function createChildReconciler(shouldTrackSideEffects) {
   }
 
   /**
-   * 
-   * @param {*} returnFiber 
+   *
+   * @param {*} returnFiber
    * @param {*} currentFirstChild null
-   * @param {*} newChildren 
-   * @returns 
+   * @param {*} newChildren
+   * @returns
    */
   function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren) {
     // 返回的第一个新儿子
@@ -184,7 +184,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     // 上一个新fiber
     let previousNewFiber = null;
     let newIdx = 0;
-      
+
     for (; newIdx < newChildren.length; newIdx++) {
       // 创建一个儿子
       const newFiber = createChild(returnFiber, newChildren[newIdx]);

@@ -7,15 +7,16 @@ const concurrentQueue = [];
 let concurrentQueueIndex = 0;
 
 /**
- * 
+ * 这里的queue是被fiber的memoizedState指向着，我们在queue.pending上添加了update
+ * fiber的memoizedState指向这个空间也会拿到次fiber对应的更新
  */
 export function finishQueueingConcurrentUpdates() {
   const endIndex = concurrentQueueIndex;
   concurrentQueueIndex = 0;
   let i = 0;
   while (i < endIndex) {
-    const fiber = concurrentQueue[i++];
-    const queue = concurrentQueue[i++]; // {pending: null}
+    const fiber = concurrentQueue[i++]; // fiber
+    const queue = concurrentQueue[i++]; // queue其实是和fiber的memoizedState关联的 {pending: null}
     const update = concurrentQueue[i++]; // { action, // {type: 'add', payload: 1} next: null,}
     if (queue !== null && update !== null) {
       const pending = queue.pending;
@@ -54,9 +55,9 @@ function getRootForUpdateFiber(sourceFiber) {
 
 /**
  * @description 把更新先缓存到concurrentQueue数组中
- * @param {*} fiber 
- * @param {*} queue 
- * @param {*} update 
+ * @param {*} fiber
+ * @param {*} queue
+ * @param {*} update
  */
 function enqueueUpdate(fiber, queue, update) {
   // 012 setNumber1 345 setNumber2 678 setNumber3

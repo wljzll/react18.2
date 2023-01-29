@@ -5,7 +5,7 @@ import { accumulateSinglePhaseListeners } from '../DOMPluginEventSystem';
 import { SyntheticMouseEvent } from '../SyntheticEvent';
 
 /**
- * 把要执行的回调函数添加到dispatchQueue中
+ * @description 遍历此次事件触发的DOM元素 把所有的要执行的回调函数添加到dispatchQueue中
  * @param {*} dispatchQueue 派发队列 里面放置我们的监听函数
  * @param {*} domEventName DOM事件名　click
  * @param {*} targetInst 目标fiber

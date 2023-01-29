@@ -12,7 +12,6 @@ import { renderWithHooks } from "./ReactFiberHooks";
  * @param {*} nextChildren fiber的儿子的Virtual DOM
  */
 function reconcileChildren(current, workInProgress, nextChildren) {
-  console.log('这里有pendingProps吗', workInProgress.pendingProps);
   // 如果此新fiber没有老fiber 说明此新fiber是新创建的
   if (current === null) {
     // 挂载子fiber链表
@@ -20,6 +19,7 @@ function reconcileChildren(current, workInProgress, nextChildren) {
   } else {
     // 有老fiber和老fiber的替身
     // 如果没有老fiber的话 做DOM-DIFF 拿老的子fiber链表和新的子虚拟DOM进行比较　进行最小化更新
+    // 返回的儿子节点被赋值给了当前fiber的child属性
     workInProgress.child = reconcileChildFibers(workInProgress, current.child, nextChildren);
   }
 }
@@ -47,7 +47,7 @@ function updateHostRoot(current, workInProgress) {
  * @description 构建原生组件的子Fiber链表
  * @param {*} current 老fiber
  * @param {*} workInProgress 新fiber h1
- * @returns 
+ * @returns
  */
 function updateHostComponent(current, workInProgress) {
   // 获取fiber的type
@@ -68,9 +68,9 @@ function updateHostComponent(current, workInProgress) {
 
 /**
  * @description 挂载函数式组件
- * @param {*} current 
- * @param {*} workInProgress 
- * @param {*} ComponentProps 
+ * @param {*} current
+ * @param {*} workInProgress
+ * @param {*} ComponentProps
  */
 export function mountIndeterminateComponent(current, workInProgress, Component) {
   const props = workInProgress.pendingProps;
