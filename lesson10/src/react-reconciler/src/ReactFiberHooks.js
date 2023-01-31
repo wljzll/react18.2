@@ -64,10 +64,11 @@ function basicStateReducer(state, action) {
 }
 
 /**
- * 更新state
+ * 更新state 函数重新执行回进入updateState
  * @returns [状态, setState]
  */
 function updateState() {
+  // 然后会进入updateReducer
   return updateReducer(basicStateReducer);
 }
 
@@ -95,7 +96,9 @@ function updateState() {
   if (is(eagerState, currentState)) {
     return;
   }
+  // 将hook更新按照格式存放
   const root = enqueueConcurrentHookUpdate(fiber, queue, update);
+  // 更新准备完成 开始调度更新
   scheduleUpdateOnFiber(root, fiber);
 }
 
@@ -126,7 +129,7 @@ function mountState(initialState) {
  * @returns
  */
 function updateReducer(reducer) {
-  const hook = updateWorkInProgressHook(); // 获取新的hook
+  const hook = updateWorkInProgressHook(); // 根据老的hook复用后获取新的hook
 
   const queue = hook.queue; // 获取新的hook的更新队列
 
@@ -135,7 +138,7 @@ function updateReducer(reducer) {
   const pendingQueue = queue.pending; // 获取将要生效的更新队列
 
   let newState = current.memoizedState; // 初始化一个新的状态 取值为当前的状态
-
+  // 如果有更新要计算 计算更新
   if (pendingQueue !== null) {
     queue.pending = null;
     const firstUpdate = pendingQueue.next;
@@ -231,7 +234,7 @@ export function renderWithHooks(current, workInProgress, Component, props) {
  * 触发dispatch更新的逻辑:
  * 1. 执行dispatch先去将update按照格式存入到数组中
  * 2. 此次click事件全部执行完成，更新全部存入到数组中后, requestIdleCallback才会调用scheduleUpdateOnFiber
- * 3. 由根节点进入fiber树的重新计算更新, 先是由finishQueueingConcurrentUpdates()将(1)中数组存放的更新将更新
+ * 3. 由根节点进入fiber树重新计算更新, 先是由finishQueueingConcurrentUpdates()将(1)中数组存放的更新将更新
  *    构建成闭环链表
  * 4. 当fiber构建到函数组件时, 会再次执行函数组件, 这时函数组件的新fiber已经构建完成, 会进入到更新逻辑
  * 5. 将click事件中的所有的更新操作交给reducer执行 将最后的结果赋值给最新的状态并返回[state, dispatch]
@@ -245,4 +248,27 @@ export function renderWithHooks(current, workInProgress, Component, props) {
  *
  * 2. useReducer的控制权在reducer函数
  *    useReducer(处理函数, 初始值)
+ */
+
+
+/**
+ * 更新队列问题：
+ * 1、在mount阶段声明了queue, 后续会将update存放到queue的pending上
+ *    首次挂载就到此结束都是空的
+ *
+ * 2、用户触发点击事件, 调用了dispatch, 这是更新的开端, dispatch传入的值或参数
+ *    就是本次点击事件要更新的数据, dispatch里会先把这些参数和更新处理成闭环的
+ *    链表
+ *
+ * 3、将更新处理成闭环链表后，dispatch里调用方法开始调度更新，
+ *    根Fiber更新的时候就将对应的更新赋值到对应的fiber的更新队列中了
+ *    然后开始更新FunctionComponent, 重新执行FunctionComponent函数,
+ *    函数执行之前先将useState和useReducer重新赋值成update系列
+ *    然后开始执行函数体
+ *    执行updateState或updateReducer
+ *    然后拿到对应的更新队列, 拆解链表执行更新, 将最终的状态返回给函数
+ *    然后重新生成虚拟DOM的时候拿到的就是最新的状态了
+ *    然后就用新状态更新就可以了
+ *
+ *
  */
