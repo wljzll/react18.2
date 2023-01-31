@@ -1,10 +1,17 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 
-function FunctionComponent () {
-  console.log("FunctionComponent render");
+function FunctionComponent() {
   const [number, setNumber] = React.useState(0);
-  return <button onClick={() => setNumber(number + 1)}>{number}</button>;
+  return number === 0 ? (
+    <div onClick={() => setNumber(number + 1)} key="title1" id="title">
+      title
+    </div>
+  ) : (
+    <div onClick={() => setNumber(number + 1)} key="title2" id="title2">
+      title2
+    </div>
+  );
 }
 let element = <FunctionComponent />;
 const root = createRoot(document.getElementById("root"));

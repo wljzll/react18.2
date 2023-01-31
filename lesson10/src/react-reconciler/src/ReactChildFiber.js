@@ -78,7 +78,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     const key = element.key;
     // 老的子fiber 初次挂载为null 不为null说明是更新
     let child = currentFirstChild;
-    while (child !== null) {
+    while (child !== null) { // 儿子存在
       // 判断此老子fiber的key和新的虚拟DOM对象的key是否一样 都是null null === null
       if (child.key === key) {
         // 判断老fiber对应的类型和新虚拟DOM元素对应的类型是否相同
