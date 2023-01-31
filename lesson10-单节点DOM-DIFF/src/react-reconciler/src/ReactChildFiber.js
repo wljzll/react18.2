@@ -88,7 +88,7 @@ function createChildReconciler(shouldTrackSideEffects) {
           // 如果key一样 类型也一样 则认为此节点可以服用
           const existing = useFiber(child, element.props); // 复用老fiber并返回根据老fiber复用生成的新fiber
           existing.return = returnFiber; // 给新fiber创建父子关系
-          return existing;
+          return existing; // 能复用就不往下走了
         } else { // key相同但是type不同 那就全部都不能复用 全部删除
           deleteRemaingChildren(returnFiber, child);
           break;
