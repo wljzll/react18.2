@@ -48,6 +48,8 @@ function performConcurrentWorkOnRoot(root) {
   // 拿到构建完成的fiber树
   const finishedWork = root.current.alternate;
   root.finishedWork = finishedWork;
+  printFinishedWork(finishedWork);
+  console.log(`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`);
   commitRoot(root);
   workInProgressRoot = null;
 }
@@ -143,47 +145,64 @@ function completeUnitOfWork(unitOfWork) {
 
 
 function printFinishedWork(fiber) {
-  const { flags, deletions } = fiber;
-  if (flags === ChildDeletion) {
-    fiber.flags &= (~ChildDeletion);
-    return '子节点有删除' + (deletions.map(fiber => `${fiber.type}#${fiber.memoizedProps.id}`))
+    /*
+    fiber.flags &= ~Forked;
+    fiber.flags &= ~PlacementDEV;
+    fiber.flags &= ~Snapshot;
+    fiber.flags &= ~PerformedWork;
+    */
+    if (fiber.flags !== 0) {
+      console.log(
+        getFlags(fiber.flags),
+        getTag(fiber.tag),
+        typeof fiber.type === "function" ? fiber.type.name : fiber.type,
+        fiber.memoizedProps
+      );
+      if (fiber.deletions) {
+        for (let i = 0; i < fiber.deletions.length; i++) {
+          const childToDelete = fiber.deletions[i];
+          console.log(getTag(childToDelete.tag), childToDelete.type, childToDelete.memoizedProps);
+        }
+      }
+    }
+    let child = fiber.child;
+    while (child) {
+      printFinishedWork(child);
+      child = child.sibling;
+    }
   }
-  let child = fiber.child;
-  while (child) {
-    printFinishedWork(child);
-    child = child.sibling;
+  function getTag(tag) {
+    switch (tag) {
+      case FunctionComponet:
+        return `FunctionComponent`;
+      case HostRoot:
+        return `HostRoot`;
+      case HostComponent:
+        return `HostComponent`;
+      case HostText:
+        return HostText;
+      default:
+        return tag;
+    }
   }
-  if (fiber.flags !== NoFlags) {
-    console.log(getFlags(fiber), getTag(fiber.tag), typeof fiber.type === 'function' ? fiber.type.name : fiber.type, fiber.memoizedProps);
+  function getFlags(flags) {
+    if (flags === (Update | Placement | ChildDeletion)) {
+      return `自己移动和子元素有删除`;
+    }
+    if (flags === (ChildDeletion | Update)) {
+      return `自己有更新和子元素有删除`;
+    }
+    if (flags === ChildDeletion) {
+      return `子元素有删除`;
+    }
+    if (flags === (Placement | Update)) {
+      return `移动并更新`;
+    }
+    if (flags === Placement) {
+      return `插入`;
+    }
+    if (flags === Update) {
+      return `更新`;
+    }
+    return flags;
   }
-}
-
-function getFlags(fiber) {
-  const { flags, deletions } = fiber;
-  if (flags === Placement) {
-    return '插入';
-  }
-  if (flags === Update) {
-    return '更新'
-  }
-
-  if (flags === ChildDeletion) {
-    return '子节点有删除' + (deletions.map(fiber => `${fiber.type}#${fiber.memoizedProps.id}`))
-  }
-}
-
-function getTag(tag) {
-  switch (tag) {
-    case FunctionComponet:
-      return 'FunctionComponet';
-    case HostRoot:
-      return 'HostRoot';
-    case HostComponent:
-      return 'HostComponent';
-    case HostText:
-      return 'HostText';
-
-    default:
-      return tag;
-  }
-}

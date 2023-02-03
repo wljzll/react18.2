@@ -6,9 +6,9 @@ import { precacheFiberNode, updateFiberProps } from "./ReactDOMComponentTree";
 
 /**
  * @description 判断当前的fiber的儿子是不是一个单独的文本
- * @param {*} type 
- * @param {*} props 
- * @returns 
+ * @param {*} type
+ * @param {*} props
+ * @returns
  */
 export function shouldSetTextContent(type, props) {
   return typeof props.children === "string" || typeof props.children === "number";
@@ -17,7 +17,7 @@ export function shouldSetTextContent(type, props) {
 /**
  * @description 创建文本节点的DOM元素
  * @param {*} content 文本节点fiber的文本内容
- * @returns 
+ * @returns
  */
 export function createTextInstance(content) {
   return document.createTextNode(content);
@@ -27,7 +27,7 @@ export function createTextInstance(content) {
  * @description 创建真实DOM元素
  * @param {*} type fiber对应的真实DOM的标签名
  * @param {*} props 真实DOM的属性
- * @returns 
+ * @returns
  */
 export function createInstance(type, props, internalInstanceHandle) {
   const domElement = document.createElement(type);
@@ -49,10 +49,10 @@ export function appendInitialChild(parent, child) {
 }
 
 /**
- * 
- * @param {*} domElement 
- * @param {*} type 
- * @param {*} props 
+ *
+ * @param {*} domElement
+ * @param {*} type
+ * @param {*} props
  */
 export function finalizeInitialChildren(domElement, type, props) {
   setInitialProperties(domElement, type, props);
@@ -68,7 +68,7 @@ export function appendChild(parentInstance, child) {
   parentInstance.appendChild(child);
 }
 
-export function insertBefore(parentInstance, beforeChild) {
+export function insertBefore(parentInstance, child, beforeChild) {
   parentInstance.insertBefore(child, beforeChild);
 }
 
