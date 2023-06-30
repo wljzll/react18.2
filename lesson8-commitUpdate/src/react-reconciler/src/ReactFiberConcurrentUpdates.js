@@ -63,6 +63,7 @@ function enqueueUpdate(fiber, queue, update) {
   concurrentQueue[concurrentQueueIndex++] = fiber;
   concurrentQueue[concurrentQueueIndex++] = queue;
   concurrentQueue[concurrentQueueIndex++] = update;
+  console.log(concurrentQueue, 'concurrentQueue');
 }
 /**
  * @description 找到根DOM元素 本来这个风法要处理更新优先级的问题

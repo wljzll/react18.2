@@ -23,6 +23,7 @@ function updateWorkInProgressHook() {
   // 获取将要构建的新的Hook的老hook
   if (currentHook === null) {
     const current = currentlyRenderingFiber.alternate;
+    // 拿到对应的hook
     currentHook = current.memoizedState;
   } else {
     currentHook = currentHook.next;
@@ -43,6 +44,12 @@ function updateWorkInProgressHook() {
   return workInProgressHook;
 }
 
+/**
+ * @description 更新时先将useReducer赋值成updateReducer函数 执行函数时 执行到useReducer就是
+ *              执行这个函数 这个时候就不是赋初始值了 就是计算对应的setReducer传入的action
+ * @param {*} reducer 
+ * @returns 
+ */
 function updateReducer(reducer) {
   // 获取新的hook
   const hook = updateWorkInProgressHook();
@@ -69,10 +76,18 @@ function updateReducer(reducer) {
   return [hook.memoizedState, queue.dispatch];
 }
 
+/**
+ * @description 初次渲染useReducer调用的函数
+ * @param {*} reducer 处理函数
+ * @param {*} initialArg 初始值
+ * @returns 
+ */
 function mountReducer(reducer, initialArg) {
   // 创建一个hook
   const hook = mountWorkInProgressHook();
+  // 给hook对象的memoizedState赋值 值为传入的初始值
   hook.memoizedState = initialArg;
+  // 定义queue对象
   const queue = {
     pending: null
   }
@@ -83,6 +98,12 @@ function mountReducer(reducer, initialArg) {
   return [hook.memoizedState, dispatch];
 }
 
+/**
+ * @description 用户dispatch修改值调用的真正的方法
+ * @param {*} fiber 
+ * @param {*} queue 
+ * @param {*} action 用户给reducer传入的action对象
+ */
 function dispatchReducerAction(fiber, queue, action) {
   // 在每个hook里会存放一个更新队列 更新队列是一个更新对象的循环链表 update1.next = update2.next = update3
   const update = {
@@ -98,7 +119,7 @@ function dispatchReducerAction(fiber, queue, action) {
  * @description 挂载构建中的hook
  */
 function mountWorkInProgressHook() {
-  // 定义一个新hook
+  // 定义一个hook对象
   const hook = {
     memoizedState: null, // hook的状态
     queue: null, // 存放本hook的更新队列 queue.pending = update的循环链表
@@ -108,6 +129,7 @@ function mountWorkInProgressHook() {
     // 当前函数对应的fiber的状态等于第一个hook对象
     currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
   } else {
+    // 将页面中的多个hooks使用next组成链表
     workInProgressHook = workInProgressHook.next = hook;
   }
   return workInProgressHook;
@@ -124,14 +146,14 @@ function mountWorkInProgressHook() {
 export function renderWithHooks(current, workInProgress, Component, props) {
   // 函数式组件执行时将当前的fiber赋值给currentRenderingFiber
   currentlyRenderingFiber = workInProgress;
-  // 如果有老的fiber 并且有老的hook链表 说明是更新
+  // 如果有老的fiber 并且有老的hook链表 说明是更新 将useReducer赋值成更新函数
   if (current !== null && current.memoizedState !== null) {
     ReactCurrentDispatcher.current = HooksDispatcherOnUpdate;
   } else { // 否则是首次挂载
     // 需要在函数组件执行前给ReactCurrentDispatcher.current赋值
     ReactCurrentDispatcher.current = HookDispatcherOnMount;
   }
-
+  // 执行函数组件 - 函数组件内会出发mountReducer或mountReducer
   const children = Component(props);
   currentlyRenderingFiber = null;
   workInProgressHook = null;

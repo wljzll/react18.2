@@ -23,6 +23,7 @@ function createChildReconciler(shouldTrackSideEffects) {
    * @returns 创建的fiber
    */
   function reconcileSingleElement(returnFiber, currentFirstChild, element) {
+    debugger;
     // 根据元素的虚拟DOM创建fiber
     const created = createFiberFromElement(element);
     // 当前创建的fiber的return属性指向替身fiber 也就是指向自己的父亲
@@ -90,6 +91,7 @@ function createChildReconciler(shouldTrackSideEffects) {
     // 如果一个fiber它的flags上有Placement, 说明此节点需要创建真实DOM并插入到父容器中
     // 如果父fiber节点是初次挂在 shouldTrackSideEffects=false 不需要添加flags
     // 这种情况下会在完成阶段把所有的子节点全部添加到自己身上
+    debugger;
     if (shouldTrackSideEffects) newFiber.flags |= Placement;
   }
 
