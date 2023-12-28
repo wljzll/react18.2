@@ -13,6 +13,10 @@ SimpleEventPlugin.registerEvents();
 
 const listeningMarker = `_reaceListening` + Math.random().toString(36).slice(2);
 
+/**
+ * @description 从根节点做事件委托
+ * @param {*} rootContainerElement div#root根节点
+ */
 export function listenToAllSupportedEvents(rootContainerElement) {
     // 监听根容器 也就是div#root只监听一次
     if (!rootContainerElement[listeningMarker]) {
@@ -27,7 +31,7 @@ export function listenToAllSupportedEvents(rootContainerElement) {
 }
 
 /**
- * 注册原生事件
+ * 给根节点注册原生事件
  * @param {*} domEventName 原生事件 click
  * @param {*} isCapturePhaseListener 是否是捕获阶段 true false
  * @param {*} target 目标DOM节点 div#root 容器节点
@@ -53,6 +57,14 @@ function addTrappedEventListener(target, domEventName, eventSystemFlags, isCaptu
     }
 }
 
+/**
+ * @description 依次调用事件处理函数
+ * @param {*} domEventName 
+ * @param {*} eventSystemFlags 
+ * @param {*} nativeEvent 
+ * @param {*} targetInst 
+ * @param {*} targetContainer 
+ */
 export function dispatchEventForPluginEventSystem(
     domEventName,
     eventSystemFlags,
@@ -69,6 +81,14 @@ export function dispatchEventForPluginEventSystem(
     );
 }
 
+/**
+ * @description 提取事件
+ * @param {*} domEventName 
+ * @param {*} eventSystemFlags 
+ * @param {*} nativeEvent 
+ * @param {*} targetInst 
+ * @param {*} targetContainer 
+ */
 function dispatchEventForPlugins(
     domEventName,
     eventSystemFlags,
@@ -129,6 +149,17 @@ function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePha
     }
 }
 
+
+/**
+ * 
+ * @param {*} dispatchQueue 
+ * @param {*} domEventName 
+ * @param {*} targetInst 
+ * @param {*} nativeEvent 
+ * @param {*} nativeEventTarget 
+ * @param {*} eventSystemFlags 
+ * @param {*} targetContainer 
+ */
 function extractEvents(
     dispatchQueue,
     domEventName,
@@ -149,6 +180,15 @@ function extractEvents(
     )
 }
 
+
+/**
+ * 把DOM树上所有绑定的事件都收集起来
+ * @param {*} targetFiber 
+ * @param {*} reactName 
+ * @param {*} nativeEventType 
+ * @param {*} isCapturePhase 
+ * @returns 
+ */
 export function accumulateSinglePhaseListeners(
     targetFiber,
     reactName,

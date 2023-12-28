@@ -11,7 +11,7 @@ function FunctionComponent1() {
   return <button onClick={() => setNumber(number + 1)}>{number}</button>;
 }
 
-
+debugger
 const root = createRoot(document.getElementById("root"));
 root.render(
   <FunctionComponent1 />);

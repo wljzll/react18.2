@@ -41,6 +41,7 @@ const ReactElement = (type, key, ref, props) => {
  */
 
 export function jsxDEV(type, config, maybeKey) {
+  debugger
   console.log(type, config, maybeKey);
   let propName;
   const props = {};

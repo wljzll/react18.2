@@ -7,7 +7,7 @@ const concurrentQueue = [];
 let concurrentQueueIndex = 0;
 
 /**
- * 
+ * 不同的useReduer的queue是不同的也不关联
  */
 export function finishQueueingConcurrentUpdates() {
   const endIndex = concurrentQueueIndex;

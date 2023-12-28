@@ -7,7 +7,7 @@ const concurrentQueue = [];
 let concurrentQueueIndex = 0;
 
 /**
- * 
+ * @description 把update组成一个闭环链表
  */
 export function finishQueueingConcurrentUpdates() {
   const endIndex = concurrentQueueIndex;

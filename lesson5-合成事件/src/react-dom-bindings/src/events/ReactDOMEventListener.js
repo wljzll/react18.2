@@ -2,6 +2,14 @@ import { getEventTarget } from './getEventTarget';
 import { getClosestInstanceFromNode } from '../client/ReactDOMComponentTree';
 import { dispatchEventForPluginEventSystem } from './DOMPluginEventSystem';
 
+
+/**
+ * @description 创建事件监听函数 事件触发时执行
+ * @param {*} targetContainer 事件容器
+ * @param {*} domEventName 事件名
+ * @param {*} eventSystemFlags 事件阶段
+ * @returns 
+ */
 export function createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags) {
     const listenerWrapper = dispatchDiscreteEvent;
     return listenerWrapper.bind(null, domEventName, eventSystemFlags, targetContainer);
@@ -28,7 +36,7 @@ function dispatchDiscreteEvent(domEventName, eventSystemFlags, container, native
  * @param {*} nativeEvent 
  */
 export function dispatchEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
-    // 获取事件源
+    // 兼容的获取事件源
     const nativeEventTarget = getEventTarget(nativeEvent);
     // 从事件源获取事件源最近的fiber节点
     const targetInst = getClosestInstanceFromNode(nativeEventTarget);

@@ -26,6 +26,7 @@ function extractEvents(
     let SyntheticEventCtor;
     switch (domEventName) {
         case 'click':
+            // react兼容处理过的事件对象
             SyntheticEventCtor = SyntheticMouseEvent;
             break;
         default:

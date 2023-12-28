@@ -26,7 +26,7 @@ ReactDOMRoot.prototype.render = function render(children) {
 
 
 /**
- * @description 创建ReactDOMRoot
+ * @description 创建root实例
  * @param {*} container div#root
  * @returns ReactDOMRoot实例
  */

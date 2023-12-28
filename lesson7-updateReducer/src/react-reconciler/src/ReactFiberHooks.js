@@ -52,31 +52,47 @@ function updateReducer(reducer) {
   const current = currentHook;
   // 获取将要生效的更新队列
   const pendingQueue = queue.pending;
-  // 初始化一个新的状态 取值为当前的状态
+  // 定义新的变量 取值为当前的老状态
   let newState = current.memoizedState;
+
+  
   if (pendingQueue !== null) {
     queue.pending = null;
     const firstUpdate = pendingQueue.next;
     let update = firstUpdate;
+
+    // 递归该fiber中所有的更新
     do {
       const action = update.action;
+      // 交给reducer执行 获取最新的状态
       newState = reducer(newState, action);
       update = update.next;
     } while (update !== null && update !== firstUpdate)
   }
+
+  // 本次更新完成 新的状态成了老的
   hook.memoizedState = newState;
   return [hook.memoizedState, queue.dispatch];
 }
 
+/**
+ * @description 初次渲染时 组件内执行useReducer会触发 可能会触发多次
+ * @param {*} reducer 用户传过来的reducer
+ * @param {*} initialArg 用户传过来的初始值
+ * @returns 
+ */
 function mountReducer(reducer, initialArg) {
   // 创建一个hook
   const hook = mountWorkInProgressHook();
+  // hook历史状态就是当前值
   hook.memoizedState = initialArg;
+  // 声明一个更细队列
   const queue = {
     pending: null
   }
   // 将queue添加到hook的queue上
   hook.queue = queue;
+  // 这里会形成闭包
   const dispatch = dispatchReducerAction.bind(null, currentlyRenderingFiber, queue);
   return [hook.memoizedState, dispatch];
 }
@@ -93,7 +109,7 @@ function dispatchReducerAction(fiber, queue, action) {
 }
 
 /**
- * @description 挂载构建中的hook
+ * @description 挂载构建中的hook 把一个fiber中的hook组成一个hook链表
  */
 function mountWorkInProgressHook() {
   // 定义一个新hook
@@ -132,6 +148,8 @@ export function renderWithHooks(current, workInProgress, Component, props) {
   }
 
   const children = Component(props);
+
+  // 每个fiber使用完清空
   currentlyRenderingFiber = null;
   workInProgressHook = null;
   return children;

@@ -34,7 +34,7 @@ ReactDOMRoot.prototype.render = function render(children) {
 export function createRoot(container) {
   // 创建的FiberRoot
   const root = createContainer(container);
-  // debugger;
+  debugger;
   listenToAllSupportedEvents(container);
   return new ReactDOMRoot(root);
 }

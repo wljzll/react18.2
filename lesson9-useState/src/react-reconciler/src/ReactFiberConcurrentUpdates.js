@@ -7,7 +7,7 @@ const concurrentQueue = [];
 let concurrentQueueIndex = 0;
 
 /**
- * 
+ * 将相同的hooks的更新组成闭环链表 不同的queue有自己单独的闭环链表
  */
 export function finishQueueingConcurrentUpdates() {
   const endIndex = concurrentQueueIndex;
@@ -15,7 +15,7 @@ export function finishQueueingConcurrentUpdates() {
   let i = 0;
   while (i < endIndex) {
     const fiber = concurrentQueue[i++];
-    const queue = concurrentQueue[i++]; // {pending: null}
+    const queue = concurrentQueue[i++]; // {pending: null} 这里的queue可能会是同一个
     const update = concurrentQueue[i++]; // { action, // {type: 'add', payload: 1} next: null,}
     if (queue !== null && update !== null) {
       const pending = queue.pending;

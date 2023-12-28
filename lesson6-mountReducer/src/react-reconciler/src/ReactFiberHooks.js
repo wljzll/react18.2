@@ -2,7 +2,7 @@ import ReactSharedInternals from "shared/ReactSharedInternals";
 import { scheduleUpdateOnFiber } from "./ReactFiberWorkLoop";
 import {enqueueConcurrentHookUpdate} from './ReactFiberConcurrentUpdates'
 
-const { ReactCurrentDispatcher } = ReactSharedInternals;
+const { ReactCurrentDispatcher } = ReactSharedInternals; // {current: null}
 // 当前正在渲染中的fiber
 let currentlyRenderingFiber = null;
 // 当前正在使用中的hook

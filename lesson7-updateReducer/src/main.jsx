@@ -10,6 +10,7 @@ function FunctionComponent1() {
   const [number1, setNumber1] = React.useReducer(reducer, 1);
   const [number2, setNumber2] = React.useReducer(reducer, 2);
   return <button onClick={() => {
+    debugger
     setNumber1({ type: 'add', payload: 1 })
     setNumber1({ type: 'add', payload: 2 })
     setNumber1({ type: 'add', payload: 3 })

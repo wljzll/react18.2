@@ -2,6 +2,8 @@ import { registerTwoPhaseEvent } from './EventRegistry';
 
 // dom所有的事件数组 这里只写了一个click
 const simpleEventPluginEvents = ['click'];
+
+// React事件名和原生事件名的映射
 export const topLevelEventsToReactNames = new Map();
 
 function registerSimpleEvent(domEventName, reactName) {
